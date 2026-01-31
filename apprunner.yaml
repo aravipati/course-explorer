@@ -1,0 +1,19 @@
+# AWS App Runner Configuration
+# This file configures the runtime environment for App Runner
+
+version: 1.0
+runtime: python311
+
+build:
+  commands:
+    build:
+      - pip install -r requirements.txt
+      # FAISS index is pre-built and included in repo
+
+run:
+  command: streamlit run app.py --server.port=8080 --server.address=0.0.0.0 --server.headless=true
+  network:
+    port: 8080
+  env:
+    - name: AWS_REGION
+      value: "us-west-2"

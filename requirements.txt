@@ -1,0 +1,17 @@
+# Core Framework
+streamlit>=1.41.0
+
+# LangChain ecosystem
+langchain>=0.3.14
+langchain-aws>=0.2.10
+langchain-community>=0.3.14
+
+# Vector database (using FAISS - more compatible)
+faiss-cpu>=1.9.0
+
+# AWS SDK (version managed by langchain-aws)
+boto3>=1.35.0
+
+# Data processing
+python-dotenv>=1.0.1
+numpy>=2.0.0

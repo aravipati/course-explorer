@@ -1,0 +1,13 @@
+[server]
+headless = true
+address = "0.0.0.0"
+port = 8501
+
+[theme]
+primaryColor = "#0055B7"  # UBC Blue
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F2F6"
+textColor = "#262626"
+
+[browser]
+gatherUsageStats = false

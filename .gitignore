@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.env
+
+# Vector store persistence
+chroma_db/
+# Note: faiss_index/ is INCLUDED in git for deployment
+# (App Runner can't call Bedrock during build)
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# AWS credentials (never commit these)
+.aws/
+
+# Local development notes (not for public repo)
+docs/PHASE*.md
