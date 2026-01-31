@@ -7,13 +7,15 @@ runtime: python311
 build:
   commands:
     build:
-      - pip3 install -r requirements.txt
+      - pip3 install --user -r requirements.txt
       # FAISS index is pre-built and included in repo
 
 run:
-  command: python3 -m streamlit run app.py --server.port=8080 --server.address=0.0.0.0 --server.headless=true
+  command: sh -c "pip3 install --user -r requirements.txt && python3 -m streamlit run app.py --server.port=8080 --server.address=0.0.0.0 --server.headless=true"
   network:
     port: 8080
   env:
     - name: AWS_REGION
       value: "us-west-2"
+    - name: PATH
+      value: "/root/.local/bin:$PATH"
