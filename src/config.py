@@ -26,5 +26,5 @@ CHUNK_SIZE = 1000  # For text splitting if needed
 CHUNK_OVERLAP = 200
 
 # Streamlit settings
-PAGE_TITLE = "UBC Course Advisor"
+PAGE_TITLE = "Course Explorer"
 PAGE_ICON = "🎓"

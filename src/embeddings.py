@@ -29,6 +29,12 @@ from src.config import (
 )
 
 
+def log(msg):
+    import sys
+    print(f"[EMBED] {msg}", flush=True)
+    sys.stdout.flush()
+
+
 def get_embeddings() -> BedrockEmbeddings:
     """
     Initialize Bedrock embeddings client.
@@ -36,10 +42,38 @@ def get_embeddings() -> BedrockEmbeddings:
     Returns:
         BedrockEmbeddings configured for Titan Text Embeddings V2
     """
-    return BedrockEmbeddings(
+    import boto3
+    from botocore.config import Config
+
+    log(f"Initializing Bedrock client for region: {AWS_REGION}")
+
+    # Configure timeout to avoid hanging
+    config = Config(
+        connect_timeout=5,
+        read_timeout=30,
+        retries={'max_attempts': 2}
+    )
+
+    try:
+        log("Creating boto3 client...")
+        client = boto3.client(
+            "bedrock-runtime",
+            region_name=AWS_REGION,
+            config=config,
+        )
+        log("Bedrock client created successfully")
+    except Exception as e:
+        log(f"ERROR: Failed to create Bedrock client: {e}")
+        raise
+
+    log("Creating BedrockEmbeddings...")
+    embeddings = BedrockEmbeddings(
         model_id=EMBEDDING_MODEL_ID,
         region_name=AWS_REGION,
+        client=client,
     )
+    log("BedrockEmbeddings created successfully")
+    return embeddings
 
 
 def load_courses() -> list[dict]:
@@ -160,17 +194,28 @@ def get_or_create_vector_store(force_rebuild: bool = False) -> FAISS:
     Returns:
         FAISS vector store ready for queries
     """
+    log("Starting get_or_create_vector_store...")
+    log(f"FAISS_INDEX_PATH: {FAISS_INDEX_PATH}")
+
     embeddings = get_embeddings()
+    log("Embeddings client created")
 
     # Check if index exists
     index_exists = (FAISS_INDEX_PATH / "index.faiss").exists()
+    log(f"Index exists: {index_exists}")
 
     if index_exists and not force_rebuild:
-        print("Loading existing vector store...")
-        return load_vector_store(embeddings)
+        log("Loading existing vector store...")
+        try:
+            vs = load_vector_store(embeddings)
+            log("Vector store loaded successfully")
+            return vs
+        except Exception as e:
+            log(f"ERROR: Failed to load vector store: {e}")
+            raise
 
     # Build new index
-    print("Creating new vector store...")
+    log("Creating new vector store...")
     courses = load_courses()
     documents = create_documents(courses)
     vector_store = build_vector_store(documents, embeddings)

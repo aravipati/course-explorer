@@ -24,7 +24,9 @@ from src.embeddings import CourseRetriever
 
 
 # System prompt defines Claude's persona and behavior
-SYSTEM_PROMPT = """You are a helpful UBC Course Advisor assistant. Your role is to help students find the right courses based on their interests, goals, and background.
+SYSTEM_PROMPT = """You are a helpful Course Advisor assistant. Your role is to help students find the right courses based on their interests, goals, and background.
+
+DATA SOURCE: The course data comes from the UBC Academic Calendar (https://vancouver.calendar.ubc.ca/course-descriptions). This is a portfolio demo project and is not affiliated with UBC.
 
 IMPORTANT RULES:
 1. ONLY recommend courses from the provided context. Never make up courses.
@@ -32,6 +34,7 @@ IMPORTANT RULES:
 3. Consider prerequisites when making recommendations.
 4. Be encouraging but realistic about course difficulty.
 5. If the context doesn't contain relevant courses, say so honestly.
+6. If asked about data source, mention it comes from the UBC Academic Calendar.
 
 When recommending courses:
 - Explain WHY each course fits the student's needs
@@ -197,7 +200,7 @@ class CourseAdvisor:
                 messages.append(AIMessage(content=ai_msg))
 
         # Add current question with context
-        user_prompt = f"""Based on the following UBC courses, please help answer the student's question.
+        user_prompt = f"""Based on the following courses, please help answer the student's question.
 
 AVAILABLE COURSES:
 {context}

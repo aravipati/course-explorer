@@ -1,8 +1,10 @@
 """
-UBC Course Advisor - Streamlit Application
+Course Explorer - Streamlit Application
 
-A RAG-powered chatbot that helps UBC students find the right courses
-based on their interests, goals, and background.
+A RAG-powered chatbot demo that helps explore course catalogs
+using semantic search and AI recommendations.
+
+This is a portfolio project demonstrating RAG architecture.
 
 Run locally:
     streamlit run app.py
@@ -12,8 +14,17 @@ Architecture:
 """
 
 import streamlit as st
-from src.rag import CourseAdvisor
+import sys
+
+# Use print with flush for immediate output in App Runner
+def log(msg):
+    print(f"[APP] {msg}", flush=True)
+    sys.stdout.flush()
+
+log("Starting Course Explorer app...")
+
 from src.config import PAGE_TITLE, PAGE_ICON
+log("Config loaded")
 
 # Page configuration
 st.set_page_config(
@@ -25,14 +36,26 @@ st.set_page_config(
 
 
 @st.cache_resource
-def get_advisor() -> CourseAdvisor:
+def get_advisor():
     """
     Initialize CourseAdvisor with caching.
 
     Uses st.cache_resource to avoid reloading the vector store
     on every interaction.
     """
-    return CourseAdvisor()
+    log("Initializing CourseAdvisor...")
+    try:
+        log("Importing CourseAdvisor...")
+        from src.rag import CourseAdvisor
+        log("CourseAdvisor imported, creating instance...")
+        advisor = CourseAdvisor()
+        log("CourseAdvisor initialized successfully")
+        return advisor
+    except Exception as e:
+        log(f"ERROR: Failed to initialize CourseAdvisor: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 
 def initialize_session_state():
@@ -80,17 +103,25 @@ def render_sidebar():
         # Info section
         st.header("About")
         st.markdown("""
-        This AI advisor helps you find UBC courses based on your interests and goals.
+        An AI-powered course discovery tool using RAG (Retrieval-Augmented Generation).
 
         **Features:**
-        - Semantic search across 74 courses
+        - Semantic search across courses
         - Prerequisite-aware recommendations
         - Filter by department or level
 
-        **Powered by:**
+        **Tech Stack:**
         - AWS Bedrock (Claude 3.5 Haiku)
         - FAISS vector search
         - LangChain
+        """)
+
+        st.divider()
+
+        # Disclaimer
+        st.caption("""
+        **Disclaimer:** Portfolio project for demonstration purposes.
+        Not affiliated with UBC. Data sourced from [UBC Academic Calendar](https://vancouver.calendar.ubc.ca/course-descriptions).
         """)
 
         st.divider()
@@ -122,7 +153,7 @@ def render_chat_history():
 
 def process_user_input(
     user_input: str,
-    advisor: CourseAdvisor,
+    advisor,
     department: str | None,
     level: str | None,
 ):
@@ -170,27 +201,29 @@ def render_example_queries():
         "What are the prerequisites for CPSC 340?",
     ]
 
+    # Track which example was clicked (if any)
+    selected = None
+
     cols = st.columns(2)
     for i, example in enumerate(examples):
         with cols[i % 2]:
             if st.button(example, key=f"example_{i}", use_container_width=True):
-                return example
+                selected = example
 
-    return None
+    return selected
 
 
 def main():
     """Main application entry point."""
-    # Initialize
+    # Initialize session state first (fast)
     initialize_session_state()
-    advisor = get_advisor()
 
-    # Render sidebar and get filters
+    # Render sidebar and get filters (fast - UI only)
     department, level = render_sidebar()
 
-    # Main content
+    # Main content (fast - UI only)
     st.title(f"{PAGE_ICON} {PAGE_TITLE}")
-    st.markdown("*Your AI-powered guide to UBC courses*")
+    st.markdown("*AI-powered course discovery using RAG*")
 
     # Show filter status if active
     if department or level:
@@ -212,13 +245,20 @@ def main():
         example_query = render_example_queries()
 
     # Chat input
-    user_input = st.chat_input("Ask about UBC courses...")
+    user_input = st.chat_input("Ask about courses...")
 
-    # Process input (either from chat input or example button)
-    if user_input:
-        process_user_input(user_input, advisor, department, level)
-    elif example_query:
-        process_user_input(example_query, advisor, department, level)
+    # Only initialize advisor when actually needed (on user input)
+    if user_input or example_query:
+        # Show loading message while initializing
+        with st.spinner("Initializing AI advisor..."):
+            advisor = get_advisor()
+
+        # Process input
+        if user_input:
+            process_user_input(user_input, advisor, department, level)
+        elif example_query:
+            process_user_input(example_query, advisor, department, level)
+            st.rerun()  # Clean rerun to hide example buttons
 
 
 if __name__ == "__main__":

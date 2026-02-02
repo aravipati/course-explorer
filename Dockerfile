@@ -9,6 +9,7 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first (for Docker layer caching)
@@ -20,11 +21,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code (includes pre-built faiss_index/)
 COPY . .
 
-# Expose Streamlit port
-EXPOSE 8501
+# Expose port (App Runner expects 8080)
+EXPOSE 8080
 
-# Health check for App Runner
-HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health || exit 1
+# Health check
+HEALTHCHECK CMD curl --fail http://localhost:8080/_stcore/health || exit 1
 
-# Run Streamlit
-CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
+# Run Streamlit on port 8080 with WebSocket settings for App Runner
+CMD ["streamlit", "run", "app.py", "--server.port=8080", "--server.address=0.0.0.0", "--server.headless=true", "--server.enableCORS=false", "--server.enableXsrfProtection=false", "--server.enableWebsocketCompression=false"]
