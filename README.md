@@ -6,7 +6,7 @@ A RAG-powered course discovery tool demonstrating semantic search and AI recomme
 ![AWS](https://img.shields.io/badge/AWS-Bedrock-orange)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.41+-red)
 
-**Live Demo:** [cloudllm.tech:8501](http://cloudllm.tech:8501)
+**Live Demo:** [cloudllm.tech](https://cloudllm.tech)
 
 > **Disclaimer:** This is a portfolio project for demonstration purposes. Not affiliated with UBC. Course data sourced from [UBC Academic Calendar](https://vancouver.calendar.ubc.ca/course-descriptions).
 
